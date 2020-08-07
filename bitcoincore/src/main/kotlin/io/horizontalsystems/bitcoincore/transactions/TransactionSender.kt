@@ -2,6 +2,7 @@ package io.horizontalsystems.bitcoincore.transactions
 
 import android.util.Log
 import io.horizontalsystems.bitcoincore.core.IStorage
+import io.horizontalsystems.bitcoincore.extensions.toHexString
 import io.horizontalsystems.bitcoincore.models.SentTransaction
 import io.horizontalsystems.bitcoincore.network.peer.IPeerTaskHandler
 import io.horizontalsystems.bitcoincore.network.peer.Peer
@@ -89,7 +90,7 @@ class TransactionSender(
         val sentTransaction = storage.getSentTransaction(transaction.header.hash)
 
         if (sentTransaction == null || sentTransaction.sendSuccess) {
-            Log.e("TransactionSender", "Transaction success ${sentTransaction?.retriesCount}")
+            Log.e("TransactionSender", "Transaction success retry: ${sentTransaction?.retriesCount} \n${sentTransaction?.hash?.toHexString()}")
             return
         }
 
@@ -97,7 +98,7 @@ class TransactionSender(
         sentTransaction.sendSuccess = true
 
         if (sentTransaction.retriesCount >= maxRetriesCount) {
-            Log.e("TransactionSender", "Exceeded retries ${sentTransaction.retriesCount}")
+            Log.e("TransactionSender", "Exceeded retries ${sentTransaction.retriesCount} \n${sentTransaction.hash.toHexString()}")
             transactionSyncer.handleInvalid(transaction.header.hash)
             storage.deleteSentTransaction(sentTransaction)
         } else {
