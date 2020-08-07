@@ -1,5 +1,6 @@
 package io.horizontalsystems.bitcoincore.serializers
 
+import android.util.Log
 import io.horizontalsystems.bitcoincore.io.BitcoinInputMarkable
 import io.horizontalsystems.bitcoincore.io.BitcoinOutput
 import io.horizontalsystems.bitcoincore.models.TransactionInput
@@ -44,6 +45,7 @@ object InputSerializer {
         if (forCurrentInputSignature) {
             val script = when (previousOutput.scriptType) {
                 ScriptType.P2SH -> {
+                    Log.e("InputSerializer", " ScriptType.P2SH previousOutput.redeemScript: ${previousOutput.redeemScript == null}")
                     previousOutput.redeemScript ?: throw Exception("no previous output script")
                 }
                 else -> previousOutput.lockingScript

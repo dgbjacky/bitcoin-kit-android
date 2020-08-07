@@ -1,5 +1,6 @@
 package io.horizontalsystems.bitcoincore.managers
 
+import android.util.Log
 import io.horizontalsystems.bitcoincore.storage.UnspentOutput
 import io.horizontalsystems.bitcoincore.transactions.TransactionSizeCalculator
 import io.horizontalsystems.bitcoincore.transactions.scripts.ScriptType
@@ -26,29 +27,35 @@ class UnspentOutputSelector(private val calculator: TransactionSizeCalculator, p
         var fee: Long
 
         for (unspentOutput in sortedOutputs) {
-            selectedOutputs.add(unspentOutput)
-            totalValue += unspentOutput.output.value
+            if (unspentOutput.output.scriptType == ScriptType.P2SH && unspentOutput.output.redeemScript == null){
+                //ignore
+                Log.e("UnspentOutputSelect", "ignoring broken output")
+            } else {
 
-            outputsLimit?.let {
-                if (selectedOutputs.size > it) {
-                    val outputToExclude = selectedOutputs.first()
-                    selectedOutputs.removeAt(0)
-                    totalValue -= outputToExclude.output.value
+                selectedOutputs.add(unspentOutput)
+                totalValue += unspentOutput.output.value
+
+                outputsLimit?.let {
+                    if (selectedOutputs.size > it) {
+                        val outputToExclude = selectedOutputs.first()
+                        selectedOutputs.removeAt(0)
+                        totalValue -= outputToExclude.output.value
+                    }
                 }
-            }
 
-            fee = calculator.transactionSize(selectedOutputs.map { it.output }, listOf(outputType), pluginDataOutputSize) * feeRate
+                fee = calculator.transactionSize(selectedOutputs.map { it.output }, listOf(outputType), pluginDataOutputSize) * feeRate
 
-            recipientValue = if (senderPay) value else value - fee
-            sentValue = if (senderPay) value + fee else value
+                recipientValue = if (senderPay) value else value - fee
+                sentValue = if (senderPay) value + fee else value
 
-            if (sentValue <= totalValue) {      // totalValue is enough
-                if (recipientValue >= dust) {   // receivedValue won't be dust
-                    break
-                } else {
-                    // Here senderPay is false, because otherwise "dust" exception would throw far above.
-                    // Adding more UTXOs will make fee even greater, making recipientValue even less and dust anyway
-                    throw SendValueErrors.Dust
+                if (sentValue <= totalValue) {      // totalValue is enough
+                    if (recipientValue >= dust) {   // receivedValue won't be dust
+                        break
+                    } else {
+                        // Here senderPay is false, because otherwise "dust" exception would throw far above.
+                        // Adding more UTXOs will make fee even greater, making recipientValue even less and dust anyway
+                        throw SendValueErrors.Dust
+                    }
                 }
             }
         }

@@ -1,5 +1,6 @@
 package io.horizontalsystems.bitcoincore.serializers
 
+import android.util.Log
 import io.horizontalsystems.bitcoincore.io.BitcoinInputMarkable
 import io.horizontalsystems.bitcoincore.io.BitcoinOutput
 import io.horizontalsystems.bitcoincore.models.Transaction
@@ -94,12 +95,15 @@ object TransactionSerializer {
             buffer.write(HashUtils.doubleSha256(sequences.toByteArray())) // hash sequence
 
             val inputToSign = inputsToSign[inputIndex]
-            val previousOutput = checkNotNull(inputToSign.previousOutput) { throw Exception("no previous output") }
+            val previousOutput = checkNotNull(inputToSign.previousOutput) {
+                Log.e("TransactionSerializer", "inputToSign.previousOutput is null")
+                throw Exception("no previous output") }
 
             buffer.write(InputSerializer.serializeOutpoint(inputToSign))
 
             when (previousOutput.scriptType) {
                 ScriptType.P2SH -> {
+                    Log.e("TransactionSerializer", " ScriptType.P2SH previousOutput.redeemScript: ${previousOutput.redeemScript == null}")
                     val script = previousOutput.redeemScript ?: throw Exception("no previous output script")
                     buffer.writeVarInt(script.size.toLong())
                     buffer.write(script)
