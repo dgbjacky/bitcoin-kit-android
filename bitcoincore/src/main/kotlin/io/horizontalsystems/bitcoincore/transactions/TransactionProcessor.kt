@@ -1,5 +1,6 @@
 package io.horizontalsystems.bitcoincore.transactions
 
+import android.util.Log
 import io.horizontalsystems.bitcoincore.WatchedTransactionManager
 import io.horizontalsystems.bitcoincore.blocks.IBlockchainDataListener
 import io.horizontalsystems.bitcoincore.core.IStorage
@@ -105,6 +106,7 @@ class TransactionProcessor(
                             updated.addAll(updatedTransactions)
                         }
                         ConflictResolution.ACCEPT -> {
+                            Log.e("TransactionProcessor", "ConflictResolution.ACCEPT -> processInvalid")
                             updatedTransactions.forEach { processInvalid(it.hash, transaction.header.hash) }
                             storage.addTransaction(transaction)
                             inserted.add(transaction.header)
@@ -151,6 +153,7 @@ class TransactionProcessor(
                                     storage.updateTransaction(tx)
                                     updated.add(tx)
                                 } else { // if coming other tx in block invalidate our tx
+                                    Log.e("TransactionProcessor", "pendingExists -> processInvalid ${conflictingTxHashes.size}")
                                     processInvalid(tx.hash, transaction.header.hash)
                                     needToUpdateBloomFilter = true
                                 }
@@ -169,6 +172,7 @@ class TransactionProcessor(
     }
 
     fun processInvalid(txHash: ByteArray, conflictingTxHash: ByteArray? = null) {
+        Log.e("TransactionProcessor", "processInvalid txHash: ${txHash}, \nconflictingHash: ${conflictingTxHash}")
         val invalidTransactionsFullInfo = getDescendantTransactionsFullInfo(txHash)
 
         if (invalidTransactionsFullInfo.isEmpty())
