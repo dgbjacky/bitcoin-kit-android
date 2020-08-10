@@ -63,7 +63,8 @@ class TransactionProcessor(
         // when the same transaction came in merkle block and from another peer's mempool we need to process it serial
         synchronized(this) {
             for ((index, transaction) in transactions.inTopologicalOrder().withIndex()) {
-                Log.e("TransactionProcessor", "incoming tx: ${transaction.header.hash.toHexString()}")
+                Log.e("TransactionProcessor", "incoming tx hex: ${transaction.header.hash.toHexString()}")
+                Log.e("TransactionProcessor", "incoming tx reverseHex: ${transaction.header.hash.toReversedHex()}")
                 val notMineTransaction = NotMineTransaction(transaction.header.hash, block != null)
                 if (processedNotMineTransactions.contains(notMineTransaction)) {
                     continue
