@@ -47,7 +47,7 @@ class MainViewModel : ViewModel(), BitcoinKit.Listener {
     private val bip = Bip.BIP44
 
     fun init() {
-        val words = "used ugly meat glad balance divorce inner artwork hire invest already piano".split(" ")
+        val words = "first rapid work train shallow earn swim number reject grocery people unable".split(" ")
 
         bitcoinKit = BitcoinKit(App.instance, words, walletId, networkType, syncMode = syncMode, bip = bip)
 

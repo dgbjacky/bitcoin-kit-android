@@ -89,6 +89,11 @@ class TransactionProcessor(
 
                     updated.add(transactionInDB)
                     continue
+                } else if (storage.getInvalidTransaction(transaction.header.hash) != null){
+                    storage.addTransaction(transaction)
+                    //delete it from failed
+
+                    continue
                 }
 
                 process(transaction)
@@ -96,6 +101,7 @@ class TransactionProcessor(
                 listener?.onTransactionReceived(transaction)
 
                 if (transaction.header.isMine) {
+                    Log.e("TransactionProcessor", "Transaction is mine")
                     relay(transaction.header, index, block)
 
                     val conflictingTransactions = storage.getConflictingTransactions(transaction)
@@ -124,6 +130,8 @@ class TransactionProcessor(
                                 irregularOutputFinder.hasIrregularOutput(transaction.outputs)
                     }
                 } else if (pendingExists) {
+
+                    Log.e("TransactionProcessor", "Pending exists")
 
                     processedNotMineTransactions.add(notMineTransaction)
 

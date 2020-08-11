@@ -1,5 +1,7 @@
 package io.horizontalsystems.bitcoincore.network.peer
 
+import android.util.Log
+import io.horizontalsystems.bitcoincore.extensions.toReversedHex
 import io.horizontalsystems.bitcoincore.models.InventoryItem
 import io.horizontalsystems.bitcoincore.network.peer.task.PeerTask
 import io.horizontalsystems.bitcoincore.network.peer.task.RequestTransactionsTask
@@ -16,6 +18,9 @@ class MempoolTransactions(
     override fun handleCompletedTask(peer: Peer, task: PeerTask): Boolean {
         return when (task) {
             is RequestTransactionsTask -> {
+
+                Log.e("MempoolTransactions", "handleCompletedTask: ${task.hashes.joinToString(separator = ",") { it.toReversedHex() }}")
+
                 transactionSyncer.handleRelayed(task.transactions)
                 removeFromRequestedTransactions(peer.host, task.transactions.map { it.header.hash })
                 transactionSender.transactionsRelayed(task.transactions)
@@ -27,6 +32,8 @@ class MempoolTransactions(
 
     override fun handleInventoryItems(peer: Peer, inventoryItems: List<InventoryItem>) {
         val transactionHashes = mutableListOf<ByteArray>()
+
+        Log.e("MempoolTransactions", "handleInventoryItems: ${inventoryItems.joinToString(separator = ",") { "(${it.type} - ${it.hash.toReversedHex()})" }}")
 
         inventoryItems.forEach { item ->
             if (item.type == InventoryItem.MSG_TX
