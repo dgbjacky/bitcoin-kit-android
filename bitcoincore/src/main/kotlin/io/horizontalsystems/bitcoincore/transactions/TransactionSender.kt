@@ -98,12 +98,12 @@ class TransactionSender(
         sentTransaction.sendSuccess = true
 
         if (sentTransaction.retriesCount >= maxRetriesCount) {
-            Log.e("TransactionSender", "Exceeded retries ${sentTransaction.retriesCount} \n${sentTransaction.hash.toHexString()}")
-            Log.e("TransactionSender", "Exceeded retries headerHash: ${transaction.header.hash} \n${transaction.header.hash.toHexString()}")
+            Log.e("TransactionSender", "Exceeded retries ${sentTransaction.retriesCount} - ${sentTransaction.hash.toHexString()}")
+            Log.e("TransactionSender", "Exceeded retries headerHash: ${transaction.header.hash.toHexString()}")
             transactionSyncer.handleInvalid(transaction.header.hash)
             storage.deleteSentTransaction(sentTransaction)
         } else {
-            Log.e("TransactionSender", "Transaction update ${sentTransaction.retriesCount}")
+            Log.e("TransactionSender", "Transaction update ${sentTransaction.retriesCount} - ${sentTransaction.hash.toHexString()}")
             storage.updateSentTransaction(sentTransaction)
         }
     }
