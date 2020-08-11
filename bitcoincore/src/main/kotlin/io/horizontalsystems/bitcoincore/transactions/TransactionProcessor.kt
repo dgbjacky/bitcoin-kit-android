@@ -69,7 +69,7 @@ class TransactionProcessor(
                     continue
                 }
 
-                if (storage.getInvalidTransaction(transaction.header.hash) != null && block == null) {
+                if (storage.getInvalidTransaction(transaction.header.hash) != null) {
                     continue
                 }
 
@@ -88,11 +88,6 @@ class TransactionProcessor(
                     storage.updateTransaction(transactionInDB)
 
                     updated.add(transactionInDB)
-                    continue
-                } else if (storage.getInvalidTransaction(transaction.header.hash) != null){
-                    storage.addTransaction(transaction)
-                    //delete it from failed
-
                     continue
                 }
 
