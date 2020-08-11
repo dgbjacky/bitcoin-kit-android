@@ -63,14 +63,13 @@ class TransactionProcessor(
         // when the same transaction came in merkle block and from another peer's mempool we need to process it serial
         synchronized(this) {
             for ((index, transaction) in transactions.inTopologicalOrder().withIndex()) {
-                Log.e("TransactionProcessor", "incoming tx hex: ${transaction.header.hash.toHexString()}")
                 Log.e("TransactionProcessor", "incoming tx reverseHex: ${transaction.header.hash.toReversedHex()}")
                 val notMineTransaction = NotMineTransaction(transaction.header.hash, block != null)
                 if (processedNotMineTransactions.contains(notMineTransaction)) {
                     continue
                 }
 
-                if (storage.getInvalidTransaction(transaction.header.hash) != null) {
+                if (storage.getInvalidTransaction(transaction.header.hash) != null && block == null) {
                     continue
                 }
 
@@ -97,7 +96,6 @@ class TransactionProcessor(
                 listener?.onTransactionReceived(transaction)
 
                 if (transaction.header.isMine) {
-                    Log.e("TransactionProcessor", "mine tx, ${transaction.header.hash.toHexString()}")
                     relay(transaction.header, index, block)
 
                     val conflictingTransactions = storage.getConflictingTransactions(transaction)
@@ -176,7 +174,7 @@ class TransactionProcessor(
     }
 
     fun processInvalid(txHash: ByteArray, conflictingTxHash: ByteArray? = null) {
-        Log.e("TransactionProcessor", "processInvalid txHash: ${txHash}, \nconflictingHash: ${conflictingTxHash}")
+        Log.e("TransactionProcessor", "processInvalid txHash: ${txHash.toReversedHex()}, \nconflictingHash: ${conflictingTxHash?.toReversedHex()}")
         val invalidTransactionsFullInfo = getDescendantTransactionsFullInfo(txHash)
 
         if (invalidTransactionsFullInfo.isEmpty())
