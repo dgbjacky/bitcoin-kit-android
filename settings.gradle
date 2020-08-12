@@ -4,5 +4,6 @@ include ':app',             // Demo app
         ':dashkit',         // Dash kit
         ':bitcoincashkit',  // Bitcoin Cash kit
         ':litecoinkit',     // Litecoin kit
+        ':digibytekit',     // DigiByte kit
         ':hodler',          // Hodler
         ':tools'            // Checkpoint syncer
