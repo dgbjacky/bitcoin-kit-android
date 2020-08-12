@@ -31,4 +31,6 @@ dependencies {
     implementation project(':dashkit')
     implementation project(':bitcoincashkit')
     implementation project(':litecoinkit')
+	implementation project(':digibytekit')
+	
 }
