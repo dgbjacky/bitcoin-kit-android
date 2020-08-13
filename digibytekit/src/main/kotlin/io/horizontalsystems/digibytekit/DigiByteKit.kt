@@ -67,7 +67,7 @@ class DigiByteKit : AbstractKit {
 
         network = when (networkType) {
             NetworkType.MainNetDigiByte -> {
-                initialSyncUrl = ""
+                initialSyncUrl = "https://digiexplorer.info/api"
                 MainNetDigiByte()
             }
             NetworkType.TestNetDigiByte -> {
@@ -77,7 +77,7 @@ class DigiByteKit : AbstractKit {
         }
 
         val paymentAddressParser = PaymentAddressParser("digibyte", removeScheme = true)
-        val initialSyncApi = BCoinApi(initialSyncUrl)
+        val initialSyncApi = InsightApi(initialSyncUrl)
 
         val blockValidatorSet = BlockValidatorSet()
 
