@@ -21,11 +21,12 @@ import io.horizontalsystems.bitcoincore.utils.SegwitAddressConverter
 import io.horizontalsystems.hdwalletkit.Mnemonic
 import io.horizontalsystems.digibytekit.validators.LegacyDifficultyAdjustmentValidator
 import io.horizontalsystems.digibytekit.validators.ProofOfWorkValidator
+import io.horizontalsystems.digibytekit.ScryptHasher
 
 class DigiByteKit : AbstractKit {
     enum class NetworkType {
-        MainNet,
-        TestNet
+        MainNetDigiByte,
+        TestNetDigiByte
     }
 
     interface Listener : BitcoinCore.Listener
@@ -43,20 +44,20 @@ class DigiByteKit : AbstractKit {
             context: Context,
             words: List<String>,
             walletId: String,
-            networkType: NetworkType = NetworkType.MainNet,
+            networkType: NetworkType = NetworkType.MainNetDigiByte,
             peerSize: Int = 10,
-            syncMode: io.horizontalsystems.bitcoincore.BitcoinCore.SyncMode = SyncMode.Api(),
+            syncMode: SyncMode = SyncMode.Full(),
             confirmationsThreshold: Int = 3,
-            bip: io.horizontalsystems.bitcoincore.core.Bip = Bip.BIP44
+            bip: Bip = Bip.BIP44
     ) : this(context, Mnemonic().toSeed(words), walletId, networkType, peerSize, syncMode, confirmationsThreshold, bip)
 
     constructor(
             context: Context,
             seed: ByteArray,
             walletId: String,
-            networkType: NetworkType = NetworkType.MainNet,
+            networkType: NetworkType = NetworkType.MainNetDigiByte,
             peerSize: Int = 10,
-            syncMode: SyncMode = SyncMode.Api(),
+            syncMode: SyncMode = SyncMode.Full(),
             confirmationsThreshold: Int = 3,
             bip: Bip = Bip.BIP44
     ) {
@@ -65,18 +66,18 @@ class DigiByteKit : AbstractKit {
         var initialSyncUrl = ""
 
         network = when (networkType) {
-            NetworkType.MainNet -> {
-                initialSyncUrl = "https://digiexplorer.info/api"
+            NetworkType.MainNetDigiByte -> {
+                initialSyncUrl = ""
                 MainNetDigiByte()
             }
-            NetworkType.TestNet -> {
+            NetworkType.TestNetDigiByte -> {
                 initialSyncUrl = ""
                 TestNetDigiByte()
             }
         }
 
         val paymentAddressParser = PaymentAddressParser("digibyte", removeScheme = true)
-        val initialSyncApi = InsightApi(initialSyncUrl)
+        val initialSyncApi = BCoinApi(initialSyncUrl)
 
         val blockValidatorSet = BlockValidatorSet()
 
@@ -87,10 +88,10 @@ class DigiByteKit : AbstractKit {
 
         val blockHelper = BlockValidatorHelper(storage)
 
-        if (networkType == NetworkType.MainNet) {
+        if (networkType == NetworkType.MainNetDigiByte) {
             blockValidatorChain.add(LegacyDifficultyAdjustmentValidator(blockHelper, heightInterval, targetTimespan, maxTargetBits))
             blockValidatorChain.add(BitsValidator())
-        } else if (networkType == NetworkType.TestNet) {
+        } else if (networkType == NetworkType.TestNetDigiByte) {
             blockValidatorChain.add(LegacyDifficultyAdjustmentValidator(blockHelper, heightInterval, targetTimespan, maxTargetBits))
             blockValidatorChain.add(LegacyTestNetDifficultyValidator(storage, heightInterval, targetSpacing, maxTargetBits))
             blockValidatorChain.add(BitsValidator())
@@ -137,9 +138,9 @@ class DigiByteKit : AbstractKit {
     companion object {
         var coinType: Int = 0
         const val maxTargetBits: Long = 0x1e0fffff      // Maximum difficulty
-        const val targetSpacing = 15                   // 2.5 minutes per block.
-        const val targetTimespan: Long = 15         // 3.5 days per difficulty cycle, on average.
-        const val heightInterval = targetTimespan / targetSpacing // 2016 blocks
+        const val targetSpacing = 60                   // 1 minutes per block.
+        const val targetTimespan: Long = 60         // 1 minute per difficulty cycle, on average.
+        const val heightInterval = targetTimespan / targetSpacing // 3600 blocks
 
         private fun getDatabaseName(networkType: NetworkType, walletId: String, syncMode: SyncMode, bip: Bip): String = "DigiByte-${networkType.name}-$walletId-${syncMode.javaClass.simpleName}-${bip.name}"
 
